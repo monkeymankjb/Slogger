@@ -51,10 +51,6 @@ class OmniFocusLogger < Slogger
 
     # Run an embedded applescript to get today's completed tasks
 
-    if filters.empty? then
-      filters = ["NONE", ]
-    end
-
     # ============================================================
     # iterate over the days and create entries
     $i = 0
@@ -71,18 +67,11 @@ class OmniFocusLogger < Slogger
           @log.info("Running plugin for #{timestring}")
       end
 
-      for filter in filters
         values = %x{osascript <<'APPLESCRIPT'
-          set filter to "#{filter}"
           set dteToday to setDate("#{timestring}")
           tell application "OmniFocus"
           	tell default document
-          		if filter is equal to "NONE" then
-          			set refDoneToday to a reference to (flattened tasks where (completion date ≥ dteToday))
-          		else
-          			set refDoneToday to a reference to (flattened tasks where (completion date ≥ dteToday) and name of containing project's folder = filter)
-
-          		end if
+        			set refDoneToday to a reference to (flattened tasks where (completion date ≥ dteToday))
           		set {lstName, lstContext, lstProject, lstNote} to {name, name of its context, name of its containing project, note} of refDoneToday
           		set strText to ""
 
@@ -177,7 +166,6 @@ class OmniFocusLogger < Slogger
           end
           output += "\n"
         end
-      end
       #If omnifocus_completed_tasks is true then set text for insertion
       if omnifocus_completed_tasks then
         text_completed = "#{tasks_completed} tasks completed today! \n\n"
